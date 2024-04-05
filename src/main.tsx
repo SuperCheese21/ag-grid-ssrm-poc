@@ -11,10 +11,16 @@ LicenseManager.setLicenseKey(AG_GRID_LICENSE);
 
 export const worker = setupWorker(...dataHandler);
 
-worker.start().then(() => {
-  ReactDOM.createRoot(document.getElementById("root")!).render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
-});
+worker
+  .start({
+    serviceWorker: {
+      url: `${import.meta.env.BASE_URL}mockServiceWorker.js`,
+    },
+  })
+  .then(() => {
+    ReactDOM.createRoot(document.getElementById("root")!).render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+  });
