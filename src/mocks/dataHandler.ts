@@ -21,7 +21,7 @@ export const dataHandler: HttpHandler[] = [
           )
         : rowData;
       const sortedRows = sortKey
-        ? filteredRows.sort((a, b) => {
+        ? [...filteredRows].sort((a, b) => {
             if (a[sortKey] > b[sortKey]) {
               return sortValue === "asc" ? 1 : -1;
             }
