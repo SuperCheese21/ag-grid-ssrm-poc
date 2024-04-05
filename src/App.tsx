@@ -1,7 +1,7 @@
 import { ColDef } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { useMemo } from "react";
-import { ApiResponse, IOlympicData } from "./types";
+import { ApiResponse, IOlympicData, SortQueryParams } from "./types";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import "./App.css";
@@ -23,13 +23,13 @@ function App() {
     []
   );
 
-  const defaultColDef = useMemo<ColDef>(() => {
-    return {
+  const defaultColDef = useMemo<ColDef>(
+    () => ({
       flex: 1,
       minWidth: 100,
-      sortable: false,
-    };
-  }, []);
+    }),
+    []
+  );
 
   return (
     <div style={containerStyle}>
@@ -40,9 +40,17 @@ function App() {
           rowModelType="serverSide"
           serverSideDatasource={{
             getRows: ({ request, success, fail }) => {
+              const sortParams = request.sortModel.reduce<SortQueryParams>(
+                (acc, { sort, colId }) => ({
+                  ...acc,
+                  [colId]: sort,
+                }),
+                {}
+              );
               const queryString = new URLSearchParams({
                 offset: request.startRow?.toString() ?? "0",
                 pageSize: "100",
+                ...sortParams,
               });
               fetch(`/data?${queryString.toString()}`, {
                 method: "get",

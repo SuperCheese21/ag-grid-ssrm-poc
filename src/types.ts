@@ -15,3 +15,5 @@ export interface IOlympicData {
   bronze: number;
   total: number;
 }
+
+export type SortQueryParams = Record<string, "asc" | "desc">;
