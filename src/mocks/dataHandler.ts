@@ -14,8 +14,14 @@ export const dataHandler: HttpHandler[] = [
       const sortValue = sortKey ? url.searchParams.get(sortKey) : "asc";
       const offsetValue = offset !== null ? parseInt(offset, 10) : 0;
       const pageSizeValue = pageSize !== null ? parseInt(pageSize, 10) : 100;
+      const athleteFilter = url.searchParams.get("athleteFilter");
+      const filteredRows = athleteFilter
+        ? rowData.filter(({ athlete }) =>
+            athlete.toLowerCase().includes(athleteFilter.toLowerCase())
+          )
+        : rowData;
       const sortedRows = sortKey
-        ? rowData.sort((a, b) => {
+        ? filteredRows.sort((a, b) => {
             if (a[sortKey] > b[sortKey]) {
               return sortValue === "asc" ? 1 : -1;
             }
@@ -24,7 +30,7 @@ export const dataHandler: HttpHandler[] = [
             }
             return 0;
           })
-        : data;
+        : filteredRows;
       const requestedRows = sortedRows.slice(
         offsetValue,
         offsetValue + pageSizeValue

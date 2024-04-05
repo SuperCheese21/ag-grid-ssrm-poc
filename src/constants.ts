@@ -12,3 +12,5 @@ export const SORT_KEYS = [
   "silver",
   "bronze",
 ] as Array<keyof IOlympicData>;
+
+export const SEARCH_DEBOUNCE_TIME = 400;
