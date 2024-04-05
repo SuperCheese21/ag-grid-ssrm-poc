@@ -1,34 +1,76 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { ColDef } from "ag-grid-community";
+import { AgGridReact } from "ag-grid-react";
+import { useMemo } from "react";
+import { ApiResponse, IOlympicData } from "./types";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-quartz.css";
 import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const containerStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
+  const gridStyle = useMemo(() => ({ height: "100%", width: "100%" }), []);
+
+  const columnDefs = useMemo<ColDef<IOlympicData>[]>(
+    () => [
+      { field: "athlete", minWidth: 220 },
+      { field: "country", minWidth: 200 },
+      { field: "year" },
+      { field: "sport", minWidth: 200 },
+      { field: "gold" },
+      { field: "silver" },
+      { field: "bronze" },
+    ],
+    []
+  );
+
+  const defaultColDef = useMemo<ColDef>(() => {
+    return {
+      flex: 1,
+      minWidth: 100,
+      sortable: false,
+    };
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div style={containerStyle}>
+      <div style={gridStyle} className={"ag-theme-quartz-dark"}>
+        <AgGridReact<IOlympicData>
+          columnDefs={columnDefs}
+          defaultColDef={defaultColDef}
+          rowModelType="serverSide"
+          serverSideDatasource={{
+            getRows: ({ request, success, fail }) => {
+              const queryString = new URLSearchParams({
+                offset: request.startRow?.toString() ?? "0",
+                pageSize: "100",
+              });
+              fetch(`/data?${queryString.toString()}`, {
+                method: "get",
+              })
+                .then((response) => {
+                  response
+                    .json()
+                    .then((json: ApiResponse) =>
+                      success({ rowData: json.rows })
+                    )
+                    .catch(() => fail());
+                })
+                .catch(() => fail());
+            },
+          }}
+          cacheBlockSize={100}
+          maxBlocksInCache={100}
+          maxConcurrentDatasourceRequests={2}
+          blockLoadDebounceMillis={0}
+          purgeClosedRowNodes={false}
+          serverSidePivotResultFieldSeparator="_"
+          serverSideSortAllLevels={false}
+          serverSideEnableClientSideSort={false}
+          serverSideOnlyRefreshFilteredGroups={false}
+          serverSideInitialRowCount={1}
+        />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   );
 }
 
